@@ -1,0 +1,98 @@
+{
+  "theme": "LIGHT",
+  "archetype": "Archetype 4 (Swiss & High-Contrast)",
+  "vibe": "Authority, Clarity, Truth, Density. Brutalist but functional, optimized for retail POS environments.",
+  "colors": {
+    "hsl_variables": {
+      "--background": "240 5% 96%",
+      "--foreground": "240 10% 4%",
+      "--card": "0 0% 100%",
+      "--card-foreground": "240 10% 4%",
+      "--popover": "0 0% 100%",
+      "--popover-foreground": "240 10% 4%",
+      "--primary": "221 83% 53%",
+      "--primary-foreground": "0 0% 100%",
+      "--secondary": "240 5% 90%",
+      "--secondary-foreground": "240 10% 4%",
+      "--muted": "240 5% 96%",
+      "--muted-foreground": "240 4% 46%",
+      "--accent": "240 5% 90%",
+      "--accent-foreground": "240 10% 4%",
+      "--destructive": "349 89% 52%",
+      "--destructive-foreground": "0 0% 100%",
+      "--border": "240 6% 90%",
+      "--input": "240 6% 90%",
+      "--ring": "221 83% 53%",
+      "--radius": "0.25rem"
+    },
+    "rationale": "High-contrast, stark white and 10% grey with Klein Blue (Primary) and Signal Red (Destructive) for functional clarity. Avoids 'purple gradient AI-slop' completely."
+  },
+  "typography": {
+    "headings": "Satoshi",
+    "body": "IBM Plex Sans",
+    "mono": "JetBrains Mono",
+    "hierarchy": {
+      "h1": "text-4xl sm:text-5xl font-black tracking-tighter",
+      "h2": "text-2xl sm:text-3xl font-bold tracking-tight",
+      "h3": "text-xl sm:text-2xl font-semibold tracking-tight",
+      "h4": "text-lg font-medium",
+      "body": "text-base leading-relaxed",
+      "labels": "text-xs font-bold uppercase tracking-[0.2em]"
+    },
+    "rules": [
+      "MUST use JetBrains Mono for all pricing (AUD $), SKUs, and data tables for rapid scanning.",
+      "Headings must use tight tracking. Labels must use wide tracking.",
+      "Never center headings by default. Left-align text for POS utility."
+    ]
+  },
+  "layout_and_spacing": {
+    "grid_strategy": "Control Room Grid",
+    "rules": [
+      "Use 'Grid Borders' style: 1px visible borders separating major UI zones.",
+      "Manager Dashboard: Strict grid hierarchy, dense spacing (p-4 to p-6).",
+      "POS Worker Screen: 65% left panel (Product Grid & Search), 35% right panel (Cart & Checkout). Must fill screen height.",
+      "Mobile App View: Stacked bento grid, highly touchable targets."
+    ]
+  },
+  "components": {
+    "cards": "Flat background, 1px solid border (border-border), no shadow. On hover: translate-y-[-2px] with crisp shadow.",
+    "buttons": "Square or rounded-sm. Bold text. Primary buttons use Klein Blue (#2563EB). Secondary buttons use zinc-200. NO gradients.",
+    "inputs": "Flat, 1px border. MUST have high-contrast focus rings (ring-2 ring-primary).",
+    "tables": "Dense rows. No alternating background colors. 1px bottom border on rows.",
+    "charts": "Shadcn charts using the primary/destructive colors. No complex 3D or gradients. Pure line/bar charts."
+  },
+  "icons": {
+    "library": "lucide-react",
+    "instructions": "Use standard lucide-react. Stroke width 2 or 2.5 for bold, legible icons."
+  },
+  "motion_and_interactions": {
+    "hover_states": "ALWAYS explicitly set text color on hover. Example: hover:bg-zinc-900 hover:text-white.",
+    "transitions": "Use specific properties, NOT 'all'. Example: transition-colors duration-200.",
+    "animations": "Minimal. Entrance fades only. Focus on instantaneous feedback for the POS system."
+  },
+  "accessibility_and_testing": {
+    "contrast": "APCA/WCAG AA compliant. High contrast mode ready.",
+    "testing": "All interactive elements MUST include data-testid attribute. E.g., data-testid='checkout-button'."
+  },
+  "images_urls": [
+    {
+      "category": "Login Background",
+      "url": "https://images.unsplash.com/photo-1622255741798-2e31d3cc616d?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwxfHxtaW5pbWFsaXN0JTIwd2hpdGUlMjBhcmNoaXRlY3R1cmUlMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc3ODY2Njk0Nnww&ixlib=rb-4.1.0&q=85",
+      "description": "Minimalist white architecture background for the auth screen."
+    },
+    {
+      "category": "Brand Logo Placeholder",
+      "url": "https://images.pexels.com/photos/26576975/pexels-photo-26576975.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "description": "Minimalist logo placeholder for 'Store Info' settings."
+    }
+  ],
+  "instructions_to_main_agent": [
+    "Initialize React with Tailwind CSS and Shadcn UI.",
+    "Inject the provided hsl_variables into the :root scope of index.css.",
+    "Implement role-based routing (JWT). 'Worker' role strictly sees the POS interface.",
+    "Build the POS interface to be high-density: quick search, barcode input listener, and touchable grid for products.",
+    "Build the Manager Dashboard with dense, scannable data grids for Purchases, Expenses, and Sales.",
+    "Use JetBrains Mono everywhere a price or SKU is displayed.",
+    "Ensure 'data-testid' is added to all buttons, inputs, and tab triggers."
+  ]
+}
