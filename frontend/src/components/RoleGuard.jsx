@@ -14,7 +14,7 @@ export function Protected({ children, manager = false }) {
     );
   }
   if (!user) return <Navigate to="/login" replace />;
-  if (manager && user.role !== "manager") return <Navigate to="/pos" replace />;
+  if (manager && user.role !== "manager") return <Navigate to="/login" replace />;
   // workers shouldn't access manager screens
   if (!manager && user.role === "worker") return children;
   return children;
