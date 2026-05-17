@@ -28,23 +28,44 @@ export default function Dashboard() {
   const [topProducts, setTopProducts] = useState([]);
   const [reminders, setReminders] = useState([]);
 
-  const load = async () => {
-    const [d, m, s, r] = await Promise.all([
-      api.get("/reports/summary", { params: { period: "day" } }),
-      api.get("/reports/summary", { params: { period: "month" } }),
-      api.get("/reports/timeseries", { params: { days: 14 } }),
-      api.get("/sales", { params: { limit: 8 } }),
-      api.get("/products/low-stock"),
-      api.get("/reports/top-products"),
-    ]);
+const load = async () => {
+  try {
+    const d = await api.get("/reports/summary", {
+      params: { period: "day" },
+    });
+    console.log("day summary OK");
+
+    const m = await api.get("/reports/summary", {
+      params: { period: "month" },
+    });
+    console.log("month summary OK");
+
+    const s = await api.get("/reports/timeseries", {
+      params: { days: 14 },
+    });
+    console.log("timeseries OK");
+
+    const r = await api.get("/sales", {
+      params: { limit: 8 },
+    });
+    console.log("sales OK");
+
+    const low = await api.get("/products/low-stock");
+    console.log("low stock OK");
+
+    const top = await api.get("/reports/top-products");
+    console.log("top products OK");
+
     setToday(d.data);
     setMonth(m.data);
     setSeries(s.data);
     setRecent(r.data);
     setLowStock(low.data);
     setTopProducts(top.data);
-  };
-
+  }   catch (err) {
+    console.error(err);
+  }
+};
   useEffect(() => {
     load();
     const t = setInterval(load, 20000);
