@@ -136,13 +136,7 @@ export default function Login() {
             <ArrowRight className="h-4 w-4" />
           </Button>
 
-          <div className="rounded-sm border bg-secondary/40 p-3 text-xs text-muted-foreground">
-            <div className="label-cap mb-2 text-[10px]">Demo accounts</div>
-            <div className="mono space-y-1">
-              <div><strong>Manager</strong> manager@store.com / manager123</div>
-              <div><strong>Worker</strong> worker@store.com / worker123</div>
-            </div>
-          </div>
+          
         </form>
       </div>
     </div>
