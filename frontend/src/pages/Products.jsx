@@ -10,9 +10,28 @@ import {
 } from "../components/ui/dialog";
 import { toast } from "sonner";
 import BarcodeScanner from "../components/BarcodeScanner";
+//New Import for Scanning Invoice 17/05/26
+import Tesseract from "tesseract.js";
 
 const empty = { name: "", barcode: "", sku: "", category: "General", price: 0, cost: 0, stock: 0 };
+//new code for Scanning Invoice 17/05/26
+const handleInvoiceUpload = async (e) => {
+  const file = e.target.files[0];
 
+  if (!file) return;
+
+  const result = await Tesseract.recognize(
+    file,
+    "eng"
+  );
+
+  const text = result.data.text;
+
+  console.log(text);
+
+  alert("Invoice scanned. Check console output.");
+};
+//new code for Scanning Invoice 17/05/26
 export default function Products() {
   const [rows, setRows] = useState([]);
   const [q, setQ] = useState("");
@@ -87,20 +106,44 @@ export default function Products() {
   };
 
   return (
-    <div className="space-y-4 p-4 md:p-8">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <div className="label-cap">Inventory</div>
-          <h1 className="text-3xl font-bold tracking-tight">Products</h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search products" className="rounded-sm pl-9" data-testid="products-search" />
+    <>
+      <div className="space-y-4 p-4 md:p-8">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <div className="label-cap">Inventory</div>
+            <h1 className="text-3xl font-bold tracking-tight">Products</h1>
           </div>
-          <Button onClick={openNew} className="gap-2 rounded-sm" data-testid="add-product-btn">
-            <Plus className="h-4 w-4" /> Add product
-          </Button>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search products" className="rounded-sm pl-9" data-testid="products-search" />
+            </div>
+
+            <Button
+              onClick={() => document.getElementById("invoice-upload").click()}
+              variant="outline"
+              className="gap-2 rounded-sm"
+            >
+              Scan Invoice
+            </Button>
+
+            <input
+              id="invoice-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleInvoiceUpload}
+            />
+
+            <Button
+              onClick={openNew}
+              className="gap-2 rounded-sm"
+              data-testid="add-product-btn"
+            >
+              <Plus className="h-4 w-4" />
+              Add product
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -202,6 +245,6 @@ export default function Products() {
           onClose={() => setScanner(false)}
         />
       )}
-    </div>
+    </>
   );
 }
