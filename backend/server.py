@@ -231,8 +231,45 @@ async def delete_user(user_id: str, current: dict = Depends(require_manager)):
         raise HTTPException(status_code=404, detail="User not found")
     return {"ok": True}
 
-
 # ---------- Products ----------
+#----- New Code for Low Stock --------------- 17/05/2026
+@api.get("/products/low-stock")
+async def low_stock_products(_: dict = Depends(get_current_user)):
+    rows = await db.products.find({}, {"_id": 0}).to_list(1000)
+
+    low = []
+
+    for p in rows:
+        stock = p.get("stock", 0)
+
+        if stock <= 5:
+            low.append({
+                "id": p.get("id"),
+                "name": p.get("name"),
+                "sku": p.get("sku", "N/A"),
+                "stock": stock,
+            })
+
+    return low
+@api.get("/reports/top-products")
+async def top_products(_: dict = Depends(get_current_user)):
+    rows = await db.products.find({}, {"_id": 0}).to_list(1000)
+
+    ranked = sorted(
+        rows,
+        key=lambda x: x.get("sold", 0),
+        reverse=True
+    )
+
+    return [
+        {
+            "id": p.get("id"),
+            "name": p.get("name"),
+            "qty_sold": p.get("sold", 0),
+            "revenue": p.get("price", 0) * p.get("sold", 0),
+        }
+        for p in ranked[:5]
+    ]
 @api.get("/products", response_model=List[ProductOut])
 async def list_products(q: Optional[str] = None, _: dict = Depends(get_current_user)):
     filt = {}

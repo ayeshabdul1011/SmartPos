@@ -24,6 +24,9 @@ export default function Dashboard() {
   const [month, setMonth] = useState(null);
   const [series, setSeries] = useState([]);
   const [recent, setRecent] = useState([]);
+  const [lowStock, setLowStock] = useState([]);
+  const [topProducts, setTopProducts] = useState([]);
+  const [reminders, setReminders] = useState([]);
 
   const load = async () => {
     const [d, m, s, r] = await Promise.all([
@@ -31,11 +34,15 @@ export default function Dashboard() {
       api.get("/reports/summary", { params: { period: "month" } }),
       api.get("/reports/timeseries", { params: { days: 14 } }),
       api.get("/sales", { params: { limit: 8 } }),
+      api.get("/products/low-stock"),
+      api.get("/reports/top-products"),
     ]);
     setToday(d.data);
     setMonth(m.data);
     setSeries(s.data);
     setRecent(r.data);
+    setLowStock(low.data);
+    setTopProducts(top.data);
   };
 
   useEffect(() => {
@@ -45,7 +52,7 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="space-y-6 p-4 md:p-8">
+    <><><div className="space-y-6 p-4 md:p-8">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="label-cap">Manager Console</div>
@@ -65,26 +72,22 @@ export default function Dashboard() {
           label="Today · Revenue"
           value={today ? fmt(today.revenue) : "—"}
           sub={today ? `${fmtInt(today.sales_count)} sales` : ""}
-          tone="accent"
-        />
+          tone="accent" />
         <Stat
           testId="stat-today-profit"
           label="Today · Net profit"
           value={today ? fmt(today.net_profit) : "—"}
           sub={today ? `Gross ${fmt(today.gross_profit)}` : ""}
-          tone={today && today.net_profit >= 0 ? "good" : "bad"}
-        />
+          tone={today && today.net_profit >= 0 ? "good" : "bad"} />
         <Stat
           testId="stat-today-expenses"
           label="Today · Expenses"
-          value={today ? fmt(today.expenses) : "—"}
-        />
+          value={today ? fmt(today.expenses) : "—"} />
         <Stat
           testId="stat-month-revenue"
           label="Month · Revenue"
           value={month ? fmt(month.revenue) : "—"}
-          sub={month ? `Net ${fmt(month.net_profit)}` : ""}
-        />
+          sub={month ? `Net ${fmt(month.net_profit)}` : ""} />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -106,8 +109,7 @@ export default function Dashboard() {
                 <YAxis tick={{ fontSize: 11, fontFamily: "JetBrains Mono" }} stroke="hsl(var(--muted-foreground))" />
                 <Tooltip
                   formatter={(v) => fmt(v)}
-                  contentStyle={{ borderRadius: 2, border: "1px solid hsl(var(--border))", fontSize: 12 }}
-                />
+                  contentStyle={{ borderRadius: 2, border: "1px solid hsl(var(--border))", fontSize: 12 }} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 <Line type="monotone" dataKey="revenue" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} />
                 <Line type="monotone" dataKey="profit" stroke="hsl(var(--chart-3))" strokeWidth={2} dot={false} />
@@ -136,6 +138,47 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+      <div className="border bg-card p-5 mt-4">
+        <div className="label-cap">Inventory alerts</div>
+        <h3 className="text-lg font-bold tracking-tight">
+          Low stock
+        </h3>
+
+        <div className="mt-3 divide-y">
+          {lowStock.length === 0 && (
+            <div className="py-6 text-xs text-muted-foreground">
+              All products healthy.
+            </div>
+          )}
+
+          {lowStock.map((p) => (
+            <div
+              key={p.id}
+              className="flex items-center justify-between py-2"
+            >
+              <div>
+                <div className="text-sm font-semibold">
+                  {p.name}
+                </div>
+
+                <div className="mono text-[11px] text-muted-foreground">
+                  SKU · {p.sku}
+                </div>
+              </div>
+
+              <div className="text-right">
+                <div className="mono text-sm font-bold text-red-500">
+                  {p.stock}
+                </div>
+
+                <div className="text-[10px] uppercase text-red-400">
+                  low
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -174,6 +217,62 @@ export default function Dashboard() {
           <ShoppingCart className="h-5 w-5" />
         </button>
       </div>
-    </div>
+    </div><div className="border bg-card p-5">
+        <div className="label-cap">Performance</div>
+
+        <h3 className="text-lg font-bold tracking-tight">
+          Top selling products
+        </h3>
+
+        <div className="mt-4 space-y-3">
+          {topProducts.map((p, index) => (
+            <div
+              key={p.id}
+              className="flex items-center justify-between"
+            >
+              <div className="flex items-center gap-3">
+                <div className="mono text-xs text-muted-foreground">
+                  #{index + 1}
+                </div>
+
+                <div>
+                  <div className="text-sm font-semibold">
+                    {p.name}
+                  </div>
+
+                  <div className="text-[11px] text-muted-foreground">
+                    {p.qty_sold} sold
+                  </div>
+                </div>
+              </div>
+
+              <div className="mono font-bold">
+                {fmt(p.revenue)}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div></><div className="border bg-card p-5">
+        <div className="label-cap">Operations</div>
+
+        <h3 className="text-lg font-bold tracking-tight">
+          Purchase reminders
+        </h3>
+
+        <div className="mt-4 space-y-3 text-sm">
+          <div className="border-l-2 border-yellow-500 pl-3">
+            Rice stock reorder due
+          </div>
+
+          <div className="border-l-2 border-blue-500 pl-3">
+            Supplier payment tomorrow
+          </div>
+
+          <div className="border-l-2 border-red-500 pl-3">
+            Coca Cola inventory critical
+          </div>
+        </div>
+      </div></>
   );
+  
 }
