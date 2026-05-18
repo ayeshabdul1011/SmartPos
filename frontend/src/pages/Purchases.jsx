@@ -5,6 +5,7 @@ import { fmt } from "../lib/currency";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { scanInvoice } from "../lib/invoiceScanner";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "../components/ui/dialog";
@@ -12,7 +13,22 @@ import { toast } from "sonner";
 import BarcodeScanner from "../components/BarcodeScanner";
 
 const emptyLine = { product_id: null, barcode: "", name: "", quantity: 1, unit_cost: 0 };
+const handleInvoiceUpload = async (e) => {
+  const file = e.target.files[0];
 
+  if (!file) return;
+
+  try {
+    const text = await scanInvoice(file);
+
+    console.log(text);
+
+    toast.success("Invoice scanned");
+  } catch (err) {
+    console.error(err);
+    toast.error("Invoice scan failed");
+  }
+};
 export default function Purchases() {
   const [rows, setRows] = useState([]);
   const [open, setOpen] = useState(false);
@@ -20,6 +36,22 @@ export default function Purchases() {
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState([{ ...emptyLine }]);
   const [scannerIdx, setScannerIdx] = useState(null);
+  const handlePurchaseUpload = async (e) => {
+  const file = e.target.files[0];
+
+  if (!file) return;
+
+  try {
+    const text = await scanInvoice(file);
+
+    console.log(text);
+
+    toast.success("Purchase invoice scanned");
+  } catch (err) {
+    console.error(err);
+    toast.error("Scan failed");
+  }
+};
 
   const load = async () => {
     const { data } = await api.get("/purchases");
@@ -151,6 +183,23 @@ export default function Purchases() {
                   <Button size="icon" variant="outline" className="h-8 w-8 rounded-sm" onClick={() => setScannerIdx(idx)} data-testid={`purchase-scan-${idx}`}>
                     <ScanLine className="h-3.5 w-3.5" />
                   </Button>
+                  <Button
+                  onClick={() =>
+                  document.getElementById("purchase-upload").click()
+                  }
+                  variant="outline"
+                  className="gap-2 rounded-sm"
+                  >
+                  Scan Purchase Invoice
+                </Button>
+
+                <input
+                id="purchase-upload"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handlePurchaseUpload}
+                />
                 </div>
                 <Input className="m-1 h-8 rounded-sm" placeholder="Product name" value={it.name} onChange={(e) => updateItem(idx, { name: e.target.value })} data-testid={`purchase-name-${idx}`} />
                 <Input type="number" className="m-1 mono h-8 rounded-sm text-right" value={it.quantity} onChange={(e) => updateItem(idx, { quantity: e.target.value })} data-testid={`purchase-qty-${idx}`} />

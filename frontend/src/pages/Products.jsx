@@ -5,33 +5,59 @@ import { fmt } from "../lib/currency";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { scanInvoice } from "../lib/invoiceScanner";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "../components/ui/dialog";
 import { toast } from "sonner";
 import BarcodeScanner from "../components/BarcodeScanner";
-//New Import for Scanning Invoice 17/05/26
-import Tesseract from "tesseract.js";
-
 const empty = { name: "", barcode: "", sku: "", category: "General", price: 0, cost: 0, stock: 0 };
-//new code for Scanning Invoice 17/05/26
 const handleInvoiceUpload = async (e) => {
   const file = e.target.files[0];
 
   if (!file) return;
 
-  const result = await Tesseract.recognize(
-    file,
-    "eng"
-  );
+try {
+    const text = await scanInvoice(file);
 
-  const text = result.data.text;
+    const lines = text.split("\n");
 
-  console.log(text);
+    const products = [];
 
-  alert("Invoice scanned. Check console output.");
+
+    lines.forEach((line) => {
+
+    // Match:
+    // Product Name    Qty    Price
+    const match = line.match(
+      /([A-Za-z0-9\s\-\(\)&]+)\s+(\d+)\s+(\d+\.\d{2})/
+    );
+
+    if (match) {
+      products.push({
+        name: match[1].trim(),
+        stock: Number(match[2]),
+        price: Number(match[3]),
+        cost: Number(match[3]),
+        category: "General",
+        });
+      }
+    });
+    console.log(products);  
+
+    for (const p of products) {
+      await api.post("/products", p);
+    }
+
+    toast.success("Products imported");
+
+    load();
+
+  } catch (err) {
+    console.error(err);
+    toast.error("Import failed");
+  }
 };
-//new code for Scanning Invoice 17/05/26
 export default function Products() {
   const [rows, setRows] = useState([]);
   const [q, setQ] = useState("");

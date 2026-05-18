@@ -5,6 +5,7 @@ import { fmt } from "../lib/currency";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { scanInvoice } from "../lib/invoiceScanner";
 import {
   Select, SelectTrigger, SelectValue, SelectContent, SelectItem,
 } from "../components/ui/select";
@@ -12,11 +13,42 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 
 const CATS = ["Rent", "Utilities", "Salaries", "Marketing", "Supplies", "Maintenance", "Other"];
+const handleInvoiceUpload = async (e) => {
+  const file = e.target.files[0];
 
+  if (!file) return;
+
+  try {
+    const text = await scanInvoice(file);
+
+    console.log(text);
+
+    toast.success("Invoice scanned");
+  } catch (err) {
+    console.error(err);
+    toast.error("Invoice scan failed");
+  }
+};
 export default function Expenses() {
   const [rows, setRows] = useState([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ category: "Supplies", amount: 0, note: "" });
+  const handleExpenseUpload = async (e) => {
+  const file = e.target.files[0];
+
+  if (!file) return;
+
+  try {
+    const text = await scanInvoice(file);
+
+    console.log(text);
+
+    toast.success("Bill scanned");
+  } catch (err) {
+    console.error(err);
+    toast.error("Scan failed");
+  }
+};
 
   const load = async () => {
     const { data } = await api.get("/expenses");
@@ -56,6 +88,23 @@ export default function Expenses() {
           <Plus className="h-4 w-4" /> New expense
         </Button>
       </div>
+      <Button
+      onClick={() =>
+      document.getElementById("expense-upload").click()
+      }
+      variant="outline"
+      className="gap-2 rounded-sm"
+      >
+      Scan Bill
+      </Button>
+
+      <input
+      id="expense-upload"
+      type="file"
+      accept="image/*"
+      className="hidden"
+      onChange={handleExpenseUpload}
+      />
 
       <div className="overflow-hidden border bg-card">
         <table className="w-full text-sm">
