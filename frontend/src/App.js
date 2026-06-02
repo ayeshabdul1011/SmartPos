@@ -43,6 +43,10 @@ function App() {
               <Route path="/users" element={<Users />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/notifications" element={<Notifications />} />
+              <Route path="/restaurant" element={<RestaurantDashboard />} />
+              <Route path="/menu" element={<Menu />} />
+              <Route path="/kitchen" element={<Kitchen />} />
+              <Route path="/delivery-orders" element={<DeliveryOrders />} />
             </Route>
             <Route path="/" element={<RootRedirect />} />
             <Route path="*" element={<RootRedirect />} />

@@ -12,6 +12,10 @@ import {
   LogOut,
   Menu,
   X,
+  UtensilsCrossed,
+  ChefHat,
+  ClipboardList,
+  Store,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import api from "../lib/api";
@@ -20,9 +24,19 @@ import { Button } from "./ui/button";
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/pos", label: "POS", icon: ShoppingCart },
+
+  // Retail
   { to: "/products", label: "Products", icon: Package },
   { to: "/purchases", label: "Purchases", icon: Truck },
   { to: "/expenses", label: "Expenses", icon: Receipt },
+
+  // Restaurant
+  { to: "/restaurant", label: "Restaurant", icon: Store },
+  { to: "/menu", label: "Menu", icon: UtensilsCrossed },
+  { to: "/kitchen", label: "Kitchen", icon: ChefHat },
+  { to: "/delivery-orders", label: "Delivery Orders", icon: ClipboardList },
+
+  // Admin
   { to: "/reports", label: "Reports", icon: BarChart3 },
   { to: "/users", label: "Users", icon: Users },
   { to: "/notifications", label: "Alerts", icon: Bell },
