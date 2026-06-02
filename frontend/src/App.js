@@ -13,6 +13,11 @@ import Users from "./pages/Users";
 import Reports from "./pages/Reports";
 import Notifications from "./pages/Notifications";
 import { Toaster } from "./components/ui/sonner";
+import RestaurantDashboard from "./pages/RestaurantDashboard";
+import Menu from "./pages/Menu";
+import Kitchen from "./pages/Kitchen";
+import DeliveryOrders from "./pages/DeliveryOrders";
+import Tables from "./pages/Tables";
 
 function App() {
   return (
@@ -47,6 +52,7 @@ function App() {
               <Route path="/menu" element={<Menu />} />
               <Route path="/kitchen" element={<Kitchen />} />
               <Route path="/delivery-orders" element={<DeliveryOrders />} />
+              <Route path="/tables" element={<Tables />} />
             </Route>
             <Route path="/" element={<RootRedirect />} />
             <Route path="*" element={<RootRedirect />} />
