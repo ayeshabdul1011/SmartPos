@@ -35,6 +35,7 @@ const navItems = [
   { to: "/menu", label: "Menu", icon: UtensilsCrossed },
   { to: "/kitchen", label: "Kitchen", icon: ChefHat },
   { to: "/delivery-orders", label: "Delivery Orders", icon: ClipboardList },
+  { to: "/tables", label: "Tables", icon: Package },
 
   // Admin
   { to: "/reports", label: "Reports", icon: BarChart3 },
