@@ -14,7 +14,35 @@ export default function Menu() {
       name: "Mango Lassi",
       category: "Drinks",
       price: 4.90,
-      station: "Bar",
+      station: "Drinks",
+    },
+     {
+      id: 3,
+      name: "Chicken Dum Biryani",
+      category: "Main Course",
+      price: 14.90,
+      station: "Kitchen",
+    },
+     {
+      id: 4,
+      name: "Gulab Jamun",
+      category: "Sweets",
+      price: 3.90,
+      station: "Sweets",
+    },
+     {
+      id: 5,
+      name: "Goat Dum Biryani",
+      category: "Main Course",
+      price: 15.90,
+      station: "Kitchen",
+    },
+     {
+      id: 6,
+      name: "Jalebi",
+      category: "Sweets",
+      price: 2.90,
+      station: "Sweets",
     },
   ]);
 
