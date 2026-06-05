@@ -13,7 +13,7 @@ import Users from "./pages/Users";
 import Reports from "./pages/Reports";
 import Notifications from "./pages/Notifications";
 import { Toaster } from "./components/ui/sonner";
-{/*import RestaurantDashboard from "./pages/RestaurantDashboard";*/}
+import RestaurantDashboard from "./pages/RestaurantDashboard";
 import Menu from "./pages/Menu";
 import Kitchen from "./pages/Kitchen";
 import DeliveryOrders from "./pages/DeliveryOrders";
@@ -48,7 +48,7 @@ function App() {
               <Route path="/users" element={<Users />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/notifications" element={<Notifications />} />
-              {/*<Route path="/restaurant" element={<RestaurantDashboard />} />*/}
+              <Route path="/restaurant" element={<RestaurantDashboard />} /> 
               <Route path="/menu" element={<Menu />} />
               <Route path="/kitchen" element={<Kitchen />} />
               <Route path="/delivery-orders" element={<DeliveryOrders />} />
