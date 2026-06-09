@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, ScanLine, Trash2, Plus, Minus, LogOut, Bell, Printer, FileDown } from "lucide-react";
@@ -16,6 +17,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "../components/ui/dialog";
+import { useSearchParams } from "react-router-dom";
 
 export default function POS() {
   const { user, logout } = useAuth();
@@ -28,6 +30,8 @@ export default function POS() {
   const [discount, setDiscount] = useState(0);
   const [showReceipt, setShowReceipt] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [searchParams] = useSearchParams();
+  const tableId = searchParams.get("table");
 
   const loadProducts = async (q = "") => {
     try {
@@ -37,6 +41,25 @@ export default function POS() {
       toast.error(formatApiError(e.response?.data?.detail) || "Failed to load products");
     }
   };
+  const sendToKitchen = async () => {
+  try {
+    await api.post("/restaurant/orders", {
+      table_id: tableId,
+      items: cart.map((it) => ({
+        product_id: it.product.id,
+        name: it.product.name,
+        quantity: it.quantity,
+      })),
+      status: "pending",
+    });
+
+    toast.success("Order sent to kitchen");
+    setCart([]);
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to send order");
+  }
+};
 
   useEffect(() => {
     loadProducts();
@@ -97,6 +120,21 @@ export default function POS() {
       toast.error("Product not found for barcode " + code);
     }
   };
+  const saveRestaurantOrder = async () => {
+  try {
+    await api.post("/restaurant/orders", {
+      table_id: Number(tableId),
+      items: cart.map(i => ({
+        name: i.name,
+        qty: i.qty
+      }))
+    });
+
+    toast.success("Order sent to kitchen");
+  } catch (err) {
+    toast.error("Failed to save order");
+  }
+};
 
   const checkout = async () => {
     if (!cart.length) return;
@@ -124,7 +162,10 @@ export default function POS() {
   };
 
   return (
-    <div className="flex h-screen flex-col bg-background">
+        <div className="flex h-screen flex-col bg-background">
+           <div className="p-2 bg-yellow-100">
+      Table ID: {tableId || "NONE"}
+    </div>
       {/* top bar */}
       <header className="flex items-center justify-between border-b bg-card px-4 py-3">
         <div className="flex items-center gap-3">
@@ -170,7 +211,11 @@ export default function POS() {
           </Button>
         </div>
       </header>
-
+      {tableId && (
+  <div className="border-b bg-amber-50 p-3 text-center font-semibold">
+    🍽️ Table {tableId}
+  </div>
+)}      
       <div className="grid flex-1 grid-cols-1 overflow-hidden lg:grid-cols-[65fr_35fr]">
         {/* Left: products */}
         <section className="flex flex-col border-r">
@@ -276,6 +321,11 @@ export default function POS() {
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
+                   <Button
+                  onClick={saveRestaurantOrder}
+>
+  Save Order
+</Button> 
                   </li>
                 ))}
               </ul>
@@ -320,14 +370,26 @@ export default function POS() {
                 <span data-testid="cart-total">{fmt(total)}</span>
               </div>
             </div>
+            
             <Button
               size="lg"
               className="h-12 w-full rounded-sm text-base font-bold press-fx"
               disabled={cart.length === 0 || submitting}
-              onClick={checkout}
+              onClick={() => {
+              if (tableId) {
+              sendToKitchen();
+              } else {
+              checkout();
+              }
+              }}
               data-testid="checkout-btn"
             >
-              {submitting ? "Processing..." : `Charge ${fmt(total)}`}
+              {submitting
+  ? "Processing..."
+  : tableId
+    ? "Send To Kitchen"
+    : `Charge ${fmt(total)}`
+}
             </Button>
           </div>
         </section>
