@@ -48,7 +48,7 @@ export default function POS() {
       items: cart.map((it) => ({
         product_id: it.product.id,
         name: it.product.name,
-        quantity: it.quantity,
+        qty: it.quantity,
       })),
       status: "pending",
     });
