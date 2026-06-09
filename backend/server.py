@@ -167,6 +167,18 @@ class ExpenseIn(BaseModel):
     amount: float
     note: str = ""
     spent_at: Optional[str] = None  # ISO date
+class OrderItem(BaseModel):
+    name: str
+    qty: int
+
+class RestaurantOrder(BaseModel):
+    table_id: int
+    items: List[OrderItem]
+    status: str = "NEW"    
+class RestaurantOrderIn(BaseModel):
+    table_id: str
+    items: list
+    status: str = "pending"
 
 
 # ---------- Auth Endpoints ----------
@@ -220,6 +232,30 @@ async def create_user(body: UserCreate, _: dict = Depends(require_manager)):
     await db.users.insert_one(user)
     user.pop("password_hash", None)
     return UserOut(**user)
+    #restaurant orders
+@api.post("/restaurant/orders")
+async def create_restaurant_order(
+    body: RestaurantOrder,
+    _: dict = Depends(get_current_user)
+):
+    doc = body.model_dump()
+
+    doc["id"] = str(uuid.uuid4())
+    doc["created_at"] = now_iso()
+
+    await db.restaurant_orders.insert_one(doc)
+
+    return doc    
+@api.get("/restaurant/orders")
+async def get_restaurant_orders(
+    _: dict = Depends(get_current_user)
+):
+    rows = await db.restaurant_orders.find(
+        {},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+
+    return rows
 
 
 @api.delete("/users/{user_id}")
@@ -705,8 +741,11 @@ allow_origins = [frontend_origin] if frontend_origin else os.environ.get('CORS_O
 
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "https://smart-pos-teal.vercel.app",
+    ],
     allow_credentials=True,
-    allow_origins=allow_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
