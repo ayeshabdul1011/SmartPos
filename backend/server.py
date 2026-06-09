@@ -169,7 +169,7 @@ class ExpenseIn(BaseModel):
     spent_at: Optional[str] = None  # ISO date
 class OrderItem(BaseModel):
     name: str
-    qty: int
+    quantity: int
 
 class RestaurantOrder(BaseModel):
     table_id: int

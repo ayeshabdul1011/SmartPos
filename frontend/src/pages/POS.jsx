@@ -48,7 +48,7 @@ export default function POS() {
       items: cart.map((it) => ({
         product_id: it.product.id,
         name: it.product.name,
-        qty: it.quantity,
+        quantity: it.quantity,
       })),
       status: "pending",
     });
@@ -70,7 +70,7 @@ export default function POS() {
     return () => clearTimeout(t);
   }, [query]);
 
-  const addToCart = (product, qty = 1) => {
+  const addToCart = (product, quantity = 1) => {
     if (!product) return;
     if (product.stock <= 0) {
       toast.error(`${product.name} out of stock`);
@@ -80,20 +80,20 @@ export default function POS() {
       const idx = c.findIndex((i) => i.product.id === product.id);
       if (idx >= 0) {
         const next = [...c];
-        const newQty = Math.min(next[idx].quantity + qty, product.stock);
-        next[idx] = { ...next[idx], quantity: newQty };
+        const newquantity = Math.min(next[idx].quantity + quantity, product.stock);
+        next[idx] = { ...next[idx], quantity: newquantity };
         return next;
       }
-      return [...c, { product, quantity: Math.min(qty, product.stock) }];
+      return [...c, { product, quantity: Math.min(quantity, product.stock) }];
     });
   };
 
-  const updateQty = (productId, qty) => {
+  const updatequantity = (productId, quantity) => {
     setCart((c) =>
       c
         .map((it) =>
           it.product.id === productId
-            ? { ...it, quantity: Math.max(0, Math.min(qty, it.product.stock)) }
+            ? { ...it, quantity: Math.max(0, Math.min(quantity, it.product.stock)) }
             : it
         )
         .filter((it) => it.quantity > 0)
@@ -126,7 +126,7 @@ export default function POS() {
       table_id: Number(tableId),
       items: cart.map(i => ({
         name: i.name,
-        qty: i.qty
+        quantity: i.quantity
       }))
     });
 
@@ -294,8 +294,8 @@ export default function POS() {
                         size="icon"
                         variant="outline"
                         className="h-7 w-7 rounded-sm"
-                        onClick={() => updateQty(it.product.id, it.quantity - 1)}
-                        data-testid={`qty-dec-${it.product.id}`}
+                        onClick={() => updatequantity(it.product.id, it.quantity - 1)}
+                        data-testid={`quantity-dec-${it.product.id}`}
                       >
                         <Minus className="h-3 w-3" />
                       </Button>
@@ -304,8 +304,8 @@ export default function POS() {
                         size="icon"
                         variant="outline"
                         className="h-7 w-7 rounded-sm"
-                        onClick={() => updateQty(it.product.id, it.quantity + 1)}
-                        data-testid={`qty-inc-${it.product.id}`}
+                        onClick={() => updatequantity(it.product.id, it.quantity + 1)}
+                        data-testid={`quantity-inc-${it.product.id}`}
                       >
                         <Plus className="h-3 w-3" />
                       </Button>
