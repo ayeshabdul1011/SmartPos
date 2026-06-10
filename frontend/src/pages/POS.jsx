@@ -41,8 +41,18 @@ export default function POS() {
       toast.error(formatApiError(e.response?.data?.detail) || "Failed to load products");
     }
   };
+
   const sendToKitchen = async () => {
   try {
+      console.log("ORDER PAYLOAD", {
+  table_id: tableId,
+  items: cart.map((it) => ({
+    product_id: it.product.id,
+    name: it.product.name,
+    quantity: it.quantity,
+  })),
+  status: "pending",
+});
     await api.post("/restaurant/orders", {
       table_id: tableId,
       items: cart.map((it) => ({
