@@ -42,33 +42,71 @@ export default function POS() {
     }
   };
 
-  const sendToKitchen = async () => {
+const sendToKitchen = async () => {
   try {
-      console.log("ORDER PAYLOAD", {
-  table_id: tableId,
-  items: cart.map((it) => ({
-    product_id: it.product.id,
-    name: it.product.name,
-    quantity: it.quantity,
-  })),
-  status: "pending",
-});
-    await api.post("/restaurant/orders", {
-      table_id: tableId,
+    const payload = {
+      table_id: Number(tableId),
       items: cart.map((it) => ({
-        product_id: it.product.id,
         name: it.product.name,
         quantity: it.quantity,
       })),
       status: "pending",
-    });
+    };
+
+    console.log("KITCHEN PAYLOAD", payload);
+
+    await api.post("/restaurant/orders", payload);
 
     toast.success("Order sent to kitchen");
+
     setCart([]);
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to send order");
+  } 
+  /*catch (err) {
+    console.error("KITCHEN ERROR", err.response?.data);
+
+    toast.error(
+      err.response?.data?.detail
+        ? JSON.stringify(err.response.data.detail)
+        : "Failed to send order"
+    );
+  }*/
+ catch (err) {
+  console.log("FULL ERROR", err);
+  console.log("RESPONSE", err.response);
+  console.log("DATA", err.response?.data);
+
+  toast.error("Failed to save order");
+}
+};
+const saveRestaurantOrder = async () => {
+  try {
+    const payload = {
+      table_id: Number(tableId),
+      items: cart.map((it) => ({
+        name: it.product.name,
+        quantity: it.quantity,
+      })),
+      status: "pending",
+    };
+
+    console.log("SAVE ORDER PAYLOAD", payload);
+
+    await api.post("/restaurant/orders", payload);
+
+    toast.success("Order saved");
+  } 
+  /*catch (err) {
+    console.error("SAVE ORDER ERROR", err.response?.data);
+    toast.error("Failed to save order");
   }
+};*/
+catch (err) {
+  console.log("FULL ERROR", err);
+  console.log("RESPONSE", err.response);
+  console.log("DATA", err.response?.data);
+
+  toast.error("Failed to save order");
+}
 };
 
   useEffect(() => {
@@ -130,21 +168,13 @@ export default function POS() {
       toast.error("Product not found for barcode " + code);
     }
   };
-  const saveRestaurantOrder = async () => {
-  try {
-    await api.post("/restaurant/orders", {
-      table_id: Number(tableId),
-      items: cart.map(i => ({
-        name: i.name,
-        quantity: i.quantity
-      }))
-    });
-
-    toast.success("Order sent to kitchen");
-  } catch (err) {
-    toast.error("Failed to save order");
-  }
-};
+  const handleCheckout = async () => {
+    if (tableId) {
+      await sendToKitchen();
+    } else {
+      await checkout();
+    }
+  };
 
   const checkout = async () => {
     if (!cart.length) return;
@@ -331,11 +361,7 @@ export default function POS() {
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
-                   <Button
-                  onClick={saveRestaurantOrder}
->
-  Save Order
-</Button> 
+
                   </li>
                 ))}
               </ul>
@@ -380,7 +406,15 @@ export default function POS() {
                 <span data-testid="cart-total">{fmt(total)}</span>
               </div>
             </div>
-            
+            {tableId && (
+  <Button
+    variant="outline"
+    className="w-full"
+    onClick={saveRestaurantOrder}
+  >
+    Save Order
+  </Button>
+)}
             <Button
               size="lg"
               className="h-12 w-full rounded-sm text-base font-bold press-fx"
