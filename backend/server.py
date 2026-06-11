@@ -239,13 +239,16 @@ async def create_restaurant_order(
     _: dict = Depends(get_current_user)
 ):
     doc = body.model_dump()
-
+    print("RESTAURANT ORDER RECEIVED", doc)
     doc["id"] = str(uuid.uuid4())
     doc["created_at"] = now_iso()
 
     await db.restaurant_orders.insert_one(doc)
-
-    return doc    
+       return {
+        "success": True,
+        "id": doc["id"]
+    }
+// Get all restaurant orders
 @api.get("/restaurant/orders")
 async def get_restaurant_orders(
     _: dict = Depends(get_current_user)
