@@ -8,27 +8,35 @@ export default function RestaurantDashboard() {
   }, []);
 
   const loadOrders = async () => {
-    const res = await fetch(
-      "https://smartpos-backend-ore9.onrender.com/api/restaurant/orders",
-      {
-        credentials: "include",
-      }
-    );
+    try {
+      const res = await fetch(
+        "https://smartpos-backend-ore9.onrender.com/api/restaurant/orders",
+        {
+          credentials: "include",
+        }
+      );
 
-    const data = await res.json();
-    setOrders(data);
+      const data = await res.json();
+      setOrders(data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const completeOrder = async (orderId) => {
-    await fetch(
-      `https://smartpos-backend-ore9.onrender.com/api/restaurant/orders/${orderId}/complete`,
-      {
-        method: "PUT",
-        credentials: "include",
-      }
-    );
+    try {
+      await fetch(
+        `https://smartpos-backend-ore9.onrender.com/api/restaurant/orders/${orderId}/complete`,
+        {
+          method: "PUT",
+          credentials: "include",
+        }
+      );
 
-    loadOrders();
+      loadOrders();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -49,11 +57,13 @@ export default function RestaurantDashboard() {
                 Table {order.table_id}
               </h2>
 
-              {order.items.map((item, idx) => (
-                <div key={idx}>
-                  {item.quantity} × {item.name}
-                </div>
-              ))}
+              <ul className="mt-2">
+                {order.items.map((item, index) => (
+                  <li key={index}>
+                    {item.quantity} × {item.name}
+                  </li>
+                ))}
+              </ul>
 
               <button
                 className="mt-3 border px-3 py-1"

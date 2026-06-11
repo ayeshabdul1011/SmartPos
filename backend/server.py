@@ -239,18 +239,25 @@ async def create_restaurant_order(
     _: dict = Depends(get_current_user)
 ):
     try:
-        doc = body.model_dump()
+        total = 0
 
-        print("STEP 1:", doc)
+        for item in body.items:
+            product = await db.products.find_one(
+                {"name": item.name},
+                {"_id": 0}
+            )
+
+            if product:
+                total += product["price"] * item.quantity
+
+        doc = body.model_dump()
 
         doc["id"] = str(uuid.uuid4())
         doc["created_at"] = now_iso()
+        doc["status"] = "pending"
+        doc["total"] = round(total, 2)
 
-        print("STEP 2:", doc)
-
-        result = await db.restaurant_orders.insert_one(doc)
-
-        print("STEP 3 inserted:", result.inserted_id)
+        await db.restaurant_orders.insert_one(doc)
 
         return {
             "success": True,
