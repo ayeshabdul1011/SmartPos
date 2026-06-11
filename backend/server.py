@@ -232,22 +232,35 @@ async def create_user(body: UserCreate, _: dict = Depends(require_manager)):
     await db.users.insert_one(user)
     user.pop("password_hash", None)
     return UserOut(**user)
-    #restaurant orders
+    #restaurant orders check
 @api.post("/restaurant/orders")
 async def create_restaurant_order(
     body: RestaurantOrder,
     _: dict = Depends(get_current_user)
 ):
-    doc = body.model_dump()
-    print("RESTAURANT ORDER RECEIVED", doc)
-    doc["id"] = str(uuid.uuid4())
-    doc["created_at"] = now_iso()
+    try:
+        doc = body.model_dump()
 
-    await db.restaurant_orders.insert_one(doc)
-       return {
-        "success": True,
-        "id": doc["id"]
-    }
+        print("STEP 1:", doc)
+
+        doc["id"] = str(uuid.uuid4())
+        doc["created_at"] = now_iso()
+
+        print("STEP 2:", doc)
+
+        result = await db.restaurant_orders.insert_one(doc)
+
+        print("STEP 3 inserted:", result.inserted_id)
+
+        return {
+            "success": True,
+            "id": doc["id"]
+        }
+
+    except Exception as e:
+        print("ORDER ERROR:", repr(e))
+        raise
+
 // Get all restaurant orders
 @api.get("/restaurant/orders")
 async def get_restaurant_orders(
