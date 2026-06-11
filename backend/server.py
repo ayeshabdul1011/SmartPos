@@ -363,7 +363,17 @@ async def update_product(product_id: str, body: ProductIn, _: dict = Depends(req
         raise HTTPException(status_code=404, detail="Product not found")
     row = await db.products.find_one({"id": product_id}, {"_id": 0})
     return ProductOut(**row)
+@api.put("/restaurant/orders/{order_id}/complete")
+async def complete_order(
+    order_id: str,
+    _: dict = Depends(get_current_user)
+):
+    await db.restaurant_orders.update_one(
+        {"id": order_id},
+        {"$set": {"status": "completed"}}
+    )
 
+    return {"success": True}
 
 @api.delete("/products/{product_id}")
 async def delete_product(product_id: str, _: dict = Depends(require_manager)):
