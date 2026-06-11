@@ -3,7 +3,10 @@ from pathlib import Path
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
-
+def clean_mongo(doc):
+    if doc and "_id" in doc:
+        doc["_id"] = str(doc["_id"])
+    return doc
 import os
 import uuid
 import logging
@@ -175,10 +178,7 @@ class RestaurantOrder(BaseModel):
     table_id: int
     items: List[OrderItem]
     status: str = "NEW"    
-class RestaurantOrderIn(BaseModel):
-    table_id: str
-    items: list
-    status: str = "pending"
+
 
 
 # ---------- Auth Endpoints ----------
@@ -261,17 +261,17 @@ async def create_restaurant_order(
         print("ORDER ERROR:", repr(e))
         raise
 
-// Get all restaurant orders
+# Get all restaurant orders
 @api.get("/restaurant/orders")
 async def get_restaurant_orders(
     _: dict = Depends(get_current_user)
 ):
-    rows = await db.restaurant_orders.find(
-        {},
-        {"_id": 0}
-    ).sort("created_at", -1).to_list(100)
+    rows = await db.restaurant_orders.find().sort(
+        "created_at",
+        -1
+    ).to_list(100)
 
-    return rows
+    return [clean_mongo(r) for r in rows]
 
 
 @api.delete("/users/{user_id}")
