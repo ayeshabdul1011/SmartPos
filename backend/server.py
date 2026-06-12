@@ -320,7 +320,22 @@ async def create_menu_item(
 
     return doc
 
+@api.post("/restaurant/menu/seed")
+async def seed_menu(
+    _: dict = Depends(get_current_user)
+):
+    item = {
+        "id": str(uuid.uuid4()),
+        "name": "Butter Chicken",
+        "category": "Main Course",
+        "price": 18.90,
+        "station": "Kitchen",
+        "image": "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398"
+    }
 
+    await db.menu_items.insert_one(item)
+
+    return item
 # Get all restaurant orders
 @api.get("/restaurant/orders")
 async def get_restaurant_orders(
