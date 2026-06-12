@@ -140,9 +140,38 @@ const sendOrder = async () => {
   Send To Kitchen
 </button>
       <div className="flex justify-end">
-        <button className="border px-4 py-2 bg-card">
-          Add Menu Item
-        </button>
+<button
+  className="border px-4 py-2 bg-card"
+  onClick={async () => {
+    try {
+      await fetch(
+        "https://smartpos-backend-ore9.onrender.com/api/restaurant/menu",
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: "Butter Chicken",
+            category: "Main Course",
+            price: 18.9,
+            station: "Kitchen",
+            image:
+              "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398",
+          }),
+        }
+      );
+
+      alert("Menu item created");
+      loadMenu();
+    } catch (err) {
+      console.error(err);
+    }
+  }}
+>
+  Add Menu Item
+</button>
       </div>
       {isDelivery && (
   <div className="space-y-2">
