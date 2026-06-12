@@ -182,7 +182,7 @@ class MenuItem(BaseModel):
 class OrderItem(BaseModel):
     name: str
     quantity: int
-    price: float
+    price: float = 0
 
 class RestaurantOrder(BaseModel):
     table_id: Optional[int] = None
@@ -299,20 +299,37 @@ async def create_restaurant_order(
     _: dict = Depends(get_current_user)
 ):
     try:
-        order_data = {
-            "table_id": body.table_id,
-            "order_type": body.order_type,
-            "customer_name": body.customer_name,
-            "address": body.address,
-            "items": [item.dict() for item in body.items],
-            "status": body.status,
-            "created_at": datetime.now()
+        total = 0
+
+        for item in body.items:
+            product = await db.menu_items.find_one(
+                {"name": item.name},
+                {"_id": 0}
+            )
+
+            if product:
+                total += product["price"] * item.quantity
+
+        doc = body.model_dump()
+
+        doc["id"] = str(uuid.uuid4())
+        doc["created_at"] = now_iso()
+        doc["status"] = "pending"
+        doc["total"] = round(total, 2)
+
+        await db.restaurant_orders.insert_one(doc)
+
+        return {
+            "success": True,
+            "id": doc["id"]
         }
-        result = await db.orders.insert_one(order_data)
-        order_data["_id"] = str(result.inserted_id)
-        return order_data
+
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        print("ORDER ERROR:", repr(e))
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
 
 # ---------- Restaurant Menu ----------
 
