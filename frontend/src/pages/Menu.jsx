@@ -108,9 +108,10 @@ const sendOrder = async () => {
             address: address,
 
             items: cart.map((item) => ({
-              name: item.name,
-              quantity: item.quantity,
-            })),
+  name: item.name,
+  quantity: item.quantity,
+  price: item.price,
+})),
           }),
         }
       );

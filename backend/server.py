@@ -170,9 +170,19 @@ class ExpenseIn(BaseModel):
     amount: float
     note: str = ""
     spent_at: Optional[str] = None  # ISO date
+
+
+class MenuItem(BaseModel):
+    name: str
+    category: str
+    price: float
+    station: str
+    image: str = ""
+
 class OrderItem(BaseModel):
     name: str
     quantity: int
+    price: float
 
 class RestaurantOrder(BaseModel):
     table_id: Optional[int] = None
@@ -234,45 +244,82 @@ async def create_user(body: UserCreate, _: dict = Depends(require_manager)):
     await db.users.insert_one(user)
     user.pop("password_hash", None)
     return UserOut(**user)
-    #restaurant orders check
+# ---------- Restaurant Menu ----------
+
+@api.get("/restaurant/menu")
+async def get_menu(
+    _: dict = Depends(get_current_user)
+):
+    rows = await db.menu_items.find(
+        {},
+        {"_id": 0}
+    ).to_list(1000)
+
+    return rows
+
+
+@api.post("/restaurant/menu")
+async def create_menu_item(
+    body: MenuItem,
+    _: dict = Depends(get_current_user)
+):
+    doc = body.model_dump()
+
+    doc["id"] = str(uuid.uuid4())
+
+    await db.menu_items.insert_one(doc)
+
+    return doc    
+    
+    #----restaurant orders ---
 @api.post("/restaurant/orders")
 async def create_restaurant_order(
     body: RestaurantOrder,
     _: dict = Depends(get_current_user)
 ):
     try:
-        total = 0
-
-        for item in body.items:
-            product = await db.products.find_one(
-                {"name": item.name},
-                {"_id": 0}
-            )
-
-            if product:
-                total += product["price"] * item.quantity
-
-        # Create order document
-        doc = body.model_dump()
-
-        if not doc.get("order_type"):
-            doc["order_type"] = "table"
-
-        doc["id"] = str(uuid.uuid4())
-        doc["created_at"] = now_iso()
-        doc["status"] = "pending"
-        doc["total"] = round(total, 2)
-
-        await db.restaurant_orders.insert_one(doc)
-
-        return {
-            "success": True,
-            "id": doc["id"]
+        order_data = {
+            "table_id": body.table_id,
+            "order_type": body.order_type,
+            "customer_name": body.customer_name,
+            "address": body.address,
+            "items": [item.dict() for item in body.items],
+            "status": body.status,
+            "created_at": datetime.now()
         }
-
+        result = await db.orders.insert_one(order_data)
+        order_data["_id"] = str(result.inserted_id)
+        return order_data
     except Exception as e:
-        print("ORDER ERROR:", repr(e))
-        raise
+        raise HTTPException(status_code=400, detail=str(e))
+
+# ---------- Restaurant Menu ----------
+
+@api.get("/restaurant/menu")
+async def get_menu(
+    _: dict = Depends(get_current_user)
+):
+    rows = await db.menu_items.find(
+        {},
+        {"_id": 0}
+    ).to_list(1000)
+
+    return rows
+
+
+@api.post("/restaurant/menu")
+async def create_menu_item(
+    body: MenuItem,
+    _: dict = Depends(get_current_user)
+):
+    doc = body.model_dump()
+
+    doc["id"] = str(uuid.uuid4())
+
+    await db.menu_items.insert_one(doc)
+
+    return doc
+
 
 # Get all restaurant orders
 @api.get("/restaurant/orders")
