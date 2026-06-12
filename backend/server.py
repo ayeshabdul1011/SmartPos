@@ -177,12 +177,9 @@ class OrderItem(BaseModel):
 class RestaurantOrder(BaseModel):
     table_id: Optional[int] = None
     order_type: str = "table"
-
-    customer_name: Optional[str] = None
-    address: Optional[str] = None
-
+    customer_name: str = ""
+    address: str = ""
     items: List[OrderItem]
-
     status: str = "pending"
 
 
@@ -255,15 +252,16 @@ async def create_restaurant_order(
             if product:
                 total += product["price"] * item.quantity
 
-            doc = body.model_dump()
+        # Create order document
+        doc = body.model_dump()
 
-            doc["id"] = str(uuid.uuid4())
-            doc["created_at"] = now_iso()
-            doc["status"] = "pending"
-            doc["total"] = round(total, 2)
+        if not doc.get("order_type"):
+            doc["order_type"] = "table"
 
-if not doc.get("order_type"):
-    doc["order_type"] = "table"
+        doc["id"] = str(uuid.uuid4())
+        doc["created_at"] = now_iso()
+        doc["status"] = "pending"
+        doc["total"] = round(total, 2)
 
         await db.restaurant_orders.insert_one(doc)
 
