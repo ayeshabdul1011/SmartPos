@@ -269,7 +269,10 @@ async def create_menu_item(
 
     await db.menu_items.insert_one(doc)
 
-    return doc    
+    return  {
+        "success": True,
+        "id": doc["id"]
+    }    
     
     #----restaurant orders ---
 @api.post("/restaurant/orders")
