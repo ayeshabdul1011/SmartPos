@@ -1,54 +1,96 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 export default function Menu() {
   const [customerName, setCustomerName] = useState("");
   const [cart, setCart] = useState([]);
 const [address, setAddress] = useState("");
-  const [items] = useState([
-    {
-      id: 1,
-      name: "Butter Chicken",
-      category: "Main Course",
-      price: 18.90,
-      station: "Kitchen",
-    },
-    {
-      id: 2,
-      name: "Mango Lassi",
-      category: "Drinks",
-      price: 4.90,
-      station: "Drinks",
-    },
-     {
-      id: 3,
-      name: "Chicken Dum Biryani",
-      category: "Main Course",
-      price: 14.90,
-      station: "Kitchen",
-    },
-     {
-      id: 4,
-      name: "Gulab Jamun",
-      category: "Sweets",
-      price: 3.90,
-      station: "Sweets",
-    },
-     {
-      id: 5,
-      name: "Goat Dum Biryani",
-      category: "Main Course",
-      price: 15.90,
-      station: "Kitchen",
-    },
-     {
-      id: 6,
-      name: "Jalebi",
-      category: "Sweets",
-      price: 2.90,
-      station: "Sweets",
-    },
-  ]);
+const [showForm, setShowForm] = useState(false);
+
+const [newItem, setNewItem] = useState({
+  name: "",
+  category: "",
+  price: "",
+  station: "",
+  image: "",
+});
+const saveMenuItem = async () => {
+  try {
+    await fetch(
+      "https://smartpos-backend-ore9.onrender.com/api/restaurant/menu",
+      {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: newItem.name,
+          category: newItem.category,
+          price: Number(newItem.price),
+          station: newItem.station,
+          image: newItem.image,
+        }),
+      }
+    );
+
+    alert("Menu item added");
+
+    setShowForm(false);
+
+    setNewItem({
+      name: "",
+      category: "",
+      price: "",
+      station: "",
+      image: "",
+    });
+
+  } catch (err) {
+    console.error(err);
+    alert("Failed to save menu item");
+  }
+};
+const [items, setItems] = useState([]);
+useEffect(() => {
+  loadMenu();
+}, []);
+
+const loadMenu = async () => {
+  try {
+    const res = await fetch(
+      "https://smartpos-backend-ore9.onrender.com/api/restaurant/menu",
+      {
+        credentials: "include",
+      }
+    );
+
+    const data = await res.json();
+
+    setItems(data);
+  } catch (err) {
+    console.error(err);
+  }
+};
+const deleteMenuItem = async (id) => {
+  if (!window.confirm("Delete this menu item?")) {
+    return;
+  }
+
+  try {
+    await fetch(
+      `https://smartpos-backend-ore9.onrender.com/api/restaurant/menu/${id}`,
+      {
+        method: "DELETE",
+        credentials: "include",
+      }
+    );
+
+    loadMenu();
+  } catch (err) {
+    console.error(err);
+  }
+};
 const [searchParams] = useSearchParams();
 
 const tableId = searchParams.get("table");
@@ -142,36 +184,92 @@ const sendOrder = async () => {
       <div className="flex justify-end">
 <button
   className="border px-4 py-2 bg-card"
-  onClick={async () => {
-    try {
-      await fetch(
-        "https://smartpos-backend-ore9.onrender.com/api/restaurant/menu",
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: "Butter Chicken",
-            category: "Main Course",
-            price: 18.9,
-            station: "Kitchen",
-            image:
-              "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398",
-          }),
-        }
-      );
-
-      alert("Menu item created");
-      loadMenu();
-    } catch (err) {
-      console.error(err);
-    }
-  }}
+  onClick={() => setShowForm(true)}
 >
   Add Menu Item
 </button>
+{showForm && (
+  <div className="border p-4 bg-card mt-4 space-y-3">
+
+    <input
+      className="border p-2 w-full"
+      placeholder="Item Name"
+      value={newItem.name}
+      onChange={(e) =>
+        setNewItem({
+          ...newItem,
+          name: e.target.value,
+        })
+      }
+    />
+
+    <input
+      className="border p-2 w-full"
+      placeholder="Category"
+      value={newItem.category}
+      onChange={(e) =>
+        setNewItem({
+          ...newItem,
+          category: e.target.value,
+        })
+      }
+    />
+
+    <input
+      className="border p-2 w-full"
+      placeholder="Price"
+      type="number"
+      value={newItem.price}
+      onChange={(e) =>
+        setNewItem({
+          ...newItem,
+          price: e.target.value,
+        })
+      }
+    />
+
+    <input
+      className="border p-2 w-full"
+      placeholder="Kitchen Station"
+      value={newItem.station}
+      onChange={(e) =>
+        setNewItem({
+          ...newItem,
+          station: e.target.value,
+        })
+      }
+    />
+
+    <input
+      className="border p-2 w-full"
+      placeholder="Image URL"
+      value={newItem.image}
+      onChange={(e) =>
+        setNewItem({
+          ...newItem,
+          image: e.target.value,
+        })
+      }
+    />
+
+    <div className="flex gap-2">
+      <button
+        className="border px-4 py-2"
+        onClick={saveMenuItem}
+      >
+        Save
+      </button>
+
+      <button
+        className="border px-4 py-2"
+        onClick={() => setShowForm(false)}
+      >
+        Cancel
+      </button>
+    </div>
+
+  </div>
+)}
       </div>
       {isDelivery && (
   <div className="space-y-2">
@@ -237,6 +335,12 @@ const sendOrder = async () => {
                         >
                           Add
                         </button>
+                          <button
+                            className="border px-3 py-1 text-red-600"
+                            onClick={() => deleteMenuItem(item.id)}
+                      >
+                            Delete
+                          </button>
                         {qty > 0 && (
                           <span className="ml-2 font-bold">
                             x{qty}

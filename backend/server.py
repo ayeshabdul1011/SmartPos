@@ -272,7 +272,25 @@ async def create_menu_item(
     return  {
         "success": True,
         "id": doc["id"]
-    }    
+    }
+
+
+@api.delete("/restaurant/menu/{item_id}")
+async def delete_menu_item(
+    item_id: str,
+    _: dict = Depends(get_current_user)
+):
+    result = await db.menu_items.delete_one(
+        {"id": item_id}
+    )
+
+    if result.deleted_count == 0:
+        raise HTTPException(
+            status_code=404,
+            detail="Menu item not found"
+        )
+
+    return {"success": True}
     
     #----restaurant orders ---
 @api.post("/restaurant/orders")
