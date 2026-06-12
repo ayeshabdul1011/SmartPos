@@ -72,7 +72,7 @@ const loadTables = async () => {
 
            <button
             className="mt-4 border px-3 py-1"
-            onClick={() => navigate(`/pos?table=${table.id}`)}
+            onClick={() => navigate(`/menu?table=${table.id}`)}
             >
   Open Table
 </button>

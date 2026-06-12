@@ -175,10 +175,15 @@ class OrderItem(BaseModel):
     quantity: int
 
 class RestaurantOrder(BaseModel):
-    table_id: int
-    items: List[OrderItem]
-    status: str = "NEW"    
+    table_id: Optional[int] = None
+    order_type: str = "table"
 
+    customer_name: Optional[str] = None
+    address: Optional[str] = None
+
+    items: List[OrderItem]
+
+    status: str = "pending"
 
 
 # ---------- Auth Endpoints ----------
@@ -250,12 +255,15 @@ async def create_restaurant_order(
             if product:
                 total += product["price"] * item.quantity
 
-        doc = body.model_dump()
+            doc = body.model_dump()
 
-        doc["id"] = str(uuid.uuid4())
-        doc["created_at"] = now_iso()
-        doc["status"] = "pending"
-        doc["total"] = round(total, 2)
+            doc["id"] = str(uuid.uuid4())
+            doc["created_at"] = now_iso()
+            doc["status"] = "pending"
+            doc["total"] = round(total, 2)
+
+if not doc.get("order_type"):
+    doc["order_type"] = "table"
 
         await db.restaurant_orders.insert_one(doc)
 
